@@ -1,0 +1,74 @@
+/* Add these to your existing styles */
+
+.security-container {
+    background: linear-gradient(145deg, #1a1f35 0%, #2c3e50 100%);
+    border: 2px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
+}
+
+.security-header {
+    border-bottom: 2px solid rgba(37, 99, 235, 0.3);
+}
+
+.header-icon i {
+    color: #4f9eff;
+    text-shadow: 0 0 10px rgba(79, 158, 255, 0.5);
+}
+
+.security-header h2 {
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(79, 158, 255, 0.3);
+}
+
+.video-container {
+    border: 3px solid #4f9eff;
+    box-shadow: 0 0 30px rgba(79, 158, 255, 0.2);
+    background: radial-gradient(circle at center, #1a1f35 0%, #0f1623 100%);
+}
+
+.face-guide {
+    border: 4px solid rgba(79, 158, 255, 0.6);
+    box-shadow: 0 0 40px rgba(79, 158, 255, 0.3);
+}
+
+@keyframes scanning-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+.scanning-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #4f9eff, transparent);
+    animation: scanning-line 2s linear infinite;
+    z-index: 2;
+}
+
+.security-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(79, 158, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79, 158, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    z-index: 1;
+}
+
+.verify-btn {
+    background: linear-gradient(145deg, #4f9eff, #2563eb);
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.verify-btn:hover {
+    background: linear-gradient(145deg, #2563eb, #1e40af);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+.attempts-badge {
+    background: linear-gradient(145deg, #4f9eff, #2563eb);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

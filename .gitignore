@@ -1,0 +1,14 @@
+# Environment variables
+.env
+__pycache__/
+*.pyc
+venv/
+.vscode/
+.idea/
+
+# MongoDB
+data/
+*.log
+
+# Node modules
+node_modules/

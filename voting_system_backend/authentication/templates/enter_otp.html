@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OTP Verification</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .otp-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .otp-input {
+            width: 200px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 5px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .otp-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+            outline: none;
+        }
+        
+        .verify-button {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 200px;
+        }
+        
+        .verify-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .back-button {
+            margin-top: 15px;
+            color: #7f8c8d;
+            text-decoration: none;
+            display: inline-block;
+            transition: color 0.3s ease;
+        }
+        
+        .back-button:hover {
+            color: #2c3e50;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="otp-container">
+        <h2>Verify Your Identity</h2>
+        <p>Please enter the OTP sent to your phone</p>
+        
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            <input type="text" name="otp" class="otp-input" required maxlength="6" placeholder="Enter OTP">
+            <button type="submit" class="verify-button">Verify OTP</button>
+        </form>
+        
+        <a href="/auth/register/" class="back-button">← Back to Registration</a>
+    </div>
+</body>
+</html>

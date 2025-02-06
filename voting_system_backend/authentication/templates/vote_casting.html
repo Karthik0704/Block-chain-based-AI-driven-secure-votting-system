@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="voting-container">
+    <h1>Cast Your Vote</h1>
+    <div class="candidates-grid">
+        {% for candidate in candidates %}
+        <div class="candidate-card">
+            <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}">
+            <h3>{{ candidate.name }}</h3>
+            <p>{{ candidate.party }}</p>
+            <button class="vote-btn" onclick="castVote('{{ candidate.id }}')">
+                Vote for {{ candidate.name }}
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.voting-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.candidate-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.candidate-card:hover {
+    transform: translateY(-5px);
+}
+
+.candidate-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    object-fit: cover;
+}
+
+.vote-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.vote-btn:hover {
+    background: #1976D2;
+}
+</style>
+
+<script>
+function castVote(candidateId) {
+    if (confirm('Are you sure you want to vote for this candidate?')) {
+        fetch('/auth/cast-vote/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ candidate_id: candidateId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Vote cast successfully!');
+                window.location.href = '/auth/thank-you/';
+            } else {
+                alert(data.message);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

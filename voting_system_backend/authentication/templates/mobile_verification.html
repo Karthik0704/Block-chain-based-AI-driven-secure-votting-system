@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mobile Verification</title>
+    <style>
+        .camera-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+        #mobile-video {
+            width: 100%;
+            transform: scaleX(-1);
+        }
+        #capture-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px solid rgba(37, 99, 235, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+            animation: guide-pulse 2s infinite;
+        }
+        .status-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: none;
+            z-index: 1000;
+        }
+        .scanning-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            background: linear-gradient(
+                to bottom,
+                transparent,
+                rgba(37, 99, 235, 0.2),
+                transparent
+            );
+            animation: scan 2s linear infinite;
+        }
+        @keyframes guide-pulse {
+            0% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100%); opacity: 1; }
+            100% { transform: translateY(100%); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="camera-container">
+        <video id="mobile-video" autoplay playsinline></video>
+        <div class="face-guide"></div>
+        <div class="scanning-effect"></div>
+        <button id="capture-btn">Capture Photo</button>
+    </div>
+    <div class="status-message" id="status-message"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('mobile-video');
+            const captureBtn = document.getElementById('capture-btn');
+            const statusMessage = document.getElementById('status-message');
+
+            function showMessage(message, isError = false) {
+                statusMessage.textContent = message;
+                statusMessage.style.display = 'block';
+                statusMessage.style.backgroundColor = isError ? '#dc2626' : '#059669';
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+
+            // Force rear camera on mobile devices
+            const constraints = {
+                video: {
+                    facingMode: { exact: "environment" },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                }
+            };
+
+            // Fallback to any available camera if rear camera fails
+            const fallbackConstraints = {
+                video: {
+                    facingMode: "environment",
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
+                .catch(() => navigator.mediaDevices.getUserMedia(fallbackConstraints))
+                .then(stream => {
+                    video.srcObject = stream;
+                    showMessage('Camera ready');
+                })
+                .catch(error => {
+                    showMessage('Camera access denied', true);
+                    console.error('Camera error:', error);
+                });
+
+            captureBtn.addEventListener('click', function() {
+                showMessage('Processing...');
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                canvas.toBlob(blob => {
+                    const formData = new FormData();
+                    formData.append('image', blob);
+                    
+                    fetch('/auth/mobile-verify/', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.status === 'success') {
+                            showMessage('Verification successful!');
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url;
+                            }, 1000);
+                        } else {
+                            showMessage(data.message, true);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Verification error:', error);
+                        showMessage('Verification failed', true);
+                    });
+                }, 'image/jpeg', 0.95);
+            });
+        });
+
+        // Handle visibility change to restart camera if needed
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Recognition</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --error-color: #dc2626;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+        }
+
+        body {
+            background: var(--background-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .security-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-background);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .security-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .header-icon {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            animation: pulse 2s infinite;
+        }
+
+        .header-icon h2 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .attempts-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .video-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1a1a1a;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
+        }
+
+        .scanning-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            animation: scan 2s linear infinite;
+            z-index: 2;
+        }
+
+        .security-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(37, 99, 235, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37, 99, 235, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            transform: scaleX(-1);
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+            border: 4px solid rgba(37, 99, 235, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+            animation: guide-pulse 2s infinite;
+            z-index: 1;
+        }
+
+        .verify-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 9999px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+            margin-top: 1rem;
+        }
+
+        .verify-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .mobile-option {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .mobile-btn {
+            background: var(--success-color);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 9999px;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-btn:hover {
+            background: var(--primary-color);
+        }
+
+        .status-message {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .progress-container {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.5s ease;
+            border-radius: 9999px;
+            width: 0%;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 3;
+        }
+        .dev-btn {
+            background: #4f46e5;
+            margin-left: 10px;
+        }
+
+        .dev-btn:hover {
+             background: #4338ca;
+        }
+
+
+        .scanning-active .scan-overlay {
+            opacity: 1;
+            background: linear-gradient(
+                180deg,
+                rgba(37, 99, 235, 0) 0%,
+                rgba(37, 99, 235, 0.2) 50%,
+                rgba(37, 99, 235, 0) 100%
+            );
+            animation: verticalScan 2s ease-in-out infinite;
+        }
+
+        @keyframes verticalScan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes guide-pulse {
+            0% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(37, 99, 235, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.3); }
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .security-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .face-guide {
+                width: 250px;
+                height: 250px;
+            }
+
+            .verify-btn, .mobile-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="padding: 20px;">
+        <a href="{% url 'home_page' %}" class="btn-back" style="
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+    
+    {% csrf_token %}
+    <div class="security-container">
+        <div class="security-header">
+            <div class="header-icon">
+                <i class="fas fa-shield-alt"></i>
+                <h2>Secure Face Verification</h2>
+            </div>
+            <div class="attempts-badge">
+                Attempts: <span id="attempts">5</span>
+            </div>
+        </div>
+
+        <div class="video-container">
+            <div class="security-grid"></div>
+            <div class="scanning-line"></div>
+            <div class="face-guide"></div>
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display:none;"></canvas>
+            <div class="scan-overlay">
+                <div class="scanning-lines"></div>
+                <div class="scanning-grid"></div>
+                <div class="laser-line"></div>
+            </div>
+        </div>
+
+        <div class="verification-panel">
+            <button id="capture" class="verify-btn">
+                <i class="fas fa-camera"></i> Verify Identity
+            </button>
+            <div id="status" class="status-message"></div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="mobile-option">
+            <button id="use-mobile" class="mobile-btn" onclick="sendVerificationLink('user')">
+                <i class="fas fa-mobile-alt"></i> Send Verification Link
+            </button>
+            <button id="dev-mobile" class="mobile-btn dev-btn" onclick="sendVerificationLink('developer')">
+                <i class="fas fa-code"></i> Send Link to Developer
+            </button>
+            <div id="sms-status" class="status-message"></div>
+        </div>
+        
+
+    <script>
+        const baseUrl = window.location.protocol + '//' + window.location.host;
+        
+        // Browser compatibility checks
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+        }
+        
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+                const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented'));
+                }
+                return new Promise((resolve, reject) => {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            }
+        }
+
+        // Initialize webcam with face detection
+        async function initializeWebcam() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: "user",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        frameRate: { ideal: 30 }
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                await video.play();
+
+                video.addEventListener('loadeddata', () => {
+                    setInterval(() => {
+                        const isAligned = Math.random() > 0.5;
+                        updateFaceGuide(isAligned);
+                    }, 1000);
+                });
+
+                video.addEventListener('error', (e) => {
+                    console.error('Video playback error:', e);
+                    alert('Video playback error. Please refresh the page.');
+                });
+
+            } catch (error) {
+                console.error('Camera error:', error);
+                handleCameraError(error);
+            }
+        }
+
+        function handleCameraError(error) {
+    const errorMessages = {
+        NotAllowedError: 'Please enable camera access to use face verification',
+        NotFoundError: 'No camera detected. Please ensure your camera is connected',
+        default: 'Camera error: '
+    };
+    alert(errorMessages[error.name] || errorMessages.default + error.message);
+}
+
+document.addEventListener('DOMContentLoaded', initializeWebcam);
+
+function updateFaceGuide(isAligned) {
+    const guide = document.querySelector('.face-guide');
+    const color = isAligned ? "var(--success-color)" : "var(--error-color)";
+    guide.style.borderColor = color;
+    guide.style.boxShadow = `0 0 30px ${color}`;
+}
+
+document.getElementById('capture').addEventListener('click', function() {
+    const elements = {
+        video: document.getElementById('video'),
+        canvas: document.getElementById('canvas'),
+        status: document.getElementById('status'),
+        progressBar: document.getElementById('progress-bar'),
+        attempts: document.getElementById('attempts'),
+        videoContainer: document.querySelector('.video-container')
+    };
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    startVerificationProcess(elements, csrfToken);
+});
+
+function startVerificationProcess(elements, csrfToken) {
+    elements.videoContainer.classList.add('scanning-active');
+    elements.status.textContent = "Scanning...";
+    elements.status.style.color = "var(--primary-color)";
+    elements.status.style.display = "block";
+    elements.progressBar.style.width = "0%";
+
+    const scanInterval = createScanningAnimation(elements.progressBar);
+    captureAndVerifyImage(elements, csrfToken, scanInterval);
+}
+
+function createScanningAnimation(progressBar) {
+    let progress = 0;
+    return setInterval(() => {
+        progress += 2;
+        progressBar.style.width = `${progress}%`;
+        if (progress >= 100) progress = 0;
+    }, 50);
+}
+
+function captureAndVerifyImage(elements, csrfToken, scanInterval) {
+    elements.canvas.width = elements.video.videoWidth;
+    elements.canvas.height = elements.video.videoHeight;
+    elements.canvas.getContext('2d').drawImage(elements.video, 0, 0, elements.canvas.width, elements.canvas.height);
+
+    fetch('/auth/face-verification/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        credentials: 'include',
+        body: `image=${encodeURIComponent(elements.canvas.toDataURL('image/jpeg'))}`
+    })
+    .then(response => response.json())
+    .then(data => handleVerificationResponse(data, elements, scanInterval))
+    .catch(error => handleVerificationError(error, elements, scanInterval));
+}
+
+function handleVerificationResponse(data, elements, scanInterval) {
+    clearInterval(scanInterval);
+    elements.videoContainer.classList.remove('scanning-active');
+
+    if (data.attempts_remaining !== undefined) {
+        elements.attempts.textContent = data.attempts_remaining;
+    }
+
+    if (data.status === 'success' && data.match_found && data.user_verified) {
+        handleSuccessfulVerification(data, elements);
+    } else if (data.status === 'locked') {
+        handleLockedVerification(data, elements);
+    } else {
+        handleFailedVerification(data, elements);
+    }
+}
+
+function handleSuccessfulVerification(data, elements) {
+    elements.progressBar.style.width = "100%";
+    elements.progressBar.style.background = "var(--success-color)";
+    elements.status.textContent = data.message;
+    elements.status.style.color = "var(--success-color)";
+    
+    setTimeout(() => {
+        window.location.href = data.redirect_url;
+    }, 1500);
+}
+
+function handleLockedVerification(data, elements) {
+    elements.progressBar.style.width = "0%";
+    elements.status.textContent = data.message;
+    elements.status.style.color = "var(--error-color)";
+    
+    if (data.refresh) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 5000);
+    }
+}
+
+function handleFailedVerification(data, elements) {
+    elements.progressBar.style.width = "0%";
+    elements.status.textContent = data.message;
+    elements.status.style.color = "var(--error-color)";
+}
+
+function handleVerificationError(error, elements, scanInterval) {
+    clearInterval(scanInterval);
+    elements.videoContainer.classList.remove('scanning-active');
+    console.error('Error:', error);
+    elements.status.textContent = "Verification failed. Please try again.";
+    elements.status.style.color = "var(--error-color)";
+    elements.progressBar.style.width = "0%";
+}
+
+
+        // Mobile verification link handling
+        function sendVerificationLink(target) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const smsStatus = document.getElementById('sms-status');
+    
+    fetch(`${baseUrl}/auth/send-verification-link/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ target: target }),
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        smsStatus.textContent = data.message;
+        smsStatus.style.color = data.status === 'success' ? 'var(--success-color)' : 'var(--error-color)';
+        smsStatus.style.display = 'block';
+        setTimeout(() => smsStatus.style.display = 'none', 3000);
+    })
+    .catch(error => {
+        smsStatus.textContent = 'Failed to send link';
+        smsStatus.style.color = 'var(--error-color)';
+        smsStatus.style.display = 'block';
+    });
+}
+
+
+        function handleSMSResponse(data, smsStatus) {
+            smsStatus.textContent = data.status === 'success' 
+                ? 'Verification link sent to your mobile' 
+                : 'Failed to send verification link';
+            smsStatus.style.color = data.status === 'success' 
+                ? 'var(--success-color)' 
+                : 'var(--error-color)';
+            showAndHideStatus(smsStatus);
+        }
+
+        function handleSMSError(smsStatus) {
+            smsStatus.textContent = 'Error sending verification link';
+            smsStatus.style.color = 'var(--error-color)';
+            showAndHideStatus(smsStatus);
+        }
+
+        function showAndHideStatus(element) {
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        function contactDeveloper() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const smsStatus = document.getElementById('sms-status');
+    
+    fetch(`${baseUrl}/auth/contact-developer/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        smsStatus.textContent = 'Message sent to developer';
+        smsStatus.style.color = 'var(--success-color)';
+        smsStatus.style.display = 'block';
+        setTimeout(() => smsStatus.style.display = 'none', 3000);
+    })
+    .catch(error => {
+        smsStatus.textContent = 'Failed to send message';
+        smsStatus.style.color = 'var(--error-color)';
+        smsStatus.style.display = 'block';
+    });
+}
+
+    </script>
+</body>
+</html>

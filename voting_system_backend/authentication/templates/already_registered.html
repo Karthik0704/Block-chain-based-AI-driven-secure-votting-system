@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Already Registered</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .message-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-id {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 18px;
+            color: #2c3e50;
+            border: 2px dashed #bdc3c7;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .button {
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .login-button {
+            background: #3498db;
+            color: white;
+        }
+        
+        .login-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .back-button {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .back-button:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="message-container">
+        <h2>Already Registered!</h2>
+        <p>You have already registered in our system.</p>
+        
+        <div class="login-id">
+            <strong>Your Login ID:</strong><br>
+            {{ login_id }}
+        </div>
+        
+        <p>Please use this Login ID to access your account.</p>
+        
+        <div class="button-group">
+            <a href="/auth/login/" class="button login-button">Login Now</a>
+            <a href="/auth/register/" class="button back-button">Back</a>
+        </div>
+    </div>
+</body>
+</html>

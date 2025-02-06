@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Verification</title>
+    <style>
+        .container {
+            text-align: center;
+            margin: auto;
+            padding: 20px;
+            max-width: 600px;
+        }
+        .video-container {
+            position: relative;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        #progress {
+            width: 0;
+            height: 10px;
+            background-color: green;
+            border-radius: 10px;
+        }
+        .status-message {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Face Verification</h2>
+        <div class="video-container">
+            <video id="videoElement" autoplay playsinline></video>
+        </div>
+        <div class="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <p id="status-message" class="status-message">Please look at the camera for face verification</p>
+        <p id="match-percentage" class="status-message">Match: 0%</p>
+    </div>
+
+    <script>
+        const video = document.querySelector("#videoElement");
+        const csrfToken = '{{ csrf_token }}';
+        let attempts = 0;
+        const maxAttempts = 30; // Timeout after 30 seconds
+        const intervalTime = 1000; // 1 second interval
+
+        function stopCamera() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function updateUI(percentage, message) {
+            const progress = document.querySelector('#progress');
+            const statusMessage = document.querySelector('#status-message');
+            const matchPercentage = document.querySelector('#match-percentage');
+
+            progress.style.width = `${percentage}%`;
+            matchPercentage.textContent = `Match: ${percentage.toFixed(1)}%`;
+            statusMessage.textContent = message;
+        }
+
+        function initializeCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    verifyFace();
+                })
+                .catch(err => {
+                    console.error("Camera error:", err);
+                    updateUI(0, "Error accessing camera. Please check permissions.");
+                });
+        }
+
+        function verifyFace() {
+            let consecutiveMatches = 0;
+
+            const interval = setInterval(() => {
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    stopCamera();
+                    updateUI(0, "Verification failed. Please refresh to try again.");
+                    return;
+                }
+
+                fetch('/auth/face_verification/', {
+
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const matchPercentage = data.match_percentage || 0;
+                    if (matchPercentage >= 85) {
+                        consecutiveMatches += 1;
+                        if (consecutiveMatches >= 3) {
+                            clearInterval(interval);
+                            stopCamera();
+                            updateUI(100, "Face Verified! Redirecting...");
+                            setTimeout(() => {
+                                window.location.href = '/auth/voting-page/';
+                            }, 1000);
+                            return;
+                        }
+                    } else {
+                        consecutiveMatches = 0;
+                    }
+                    updateUI(matchPercentage, "Verifying...");
+                })
+                .catch(err => {
+                    console.error("Verification error:", err);
+                    updateUI(0, "Error processing verification.");
+                });
+
+                attempts += 1;
+            }, intervalTime);
+        }
+
+        // Start camera on page load
+        initializeCamera();
+        window.addEventListener('unload', stopCamera);
+    </script>
+</body>
+</html>
