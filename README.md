@@ -48,7 +48,6 @@ For licensing, collaboration, or access requests:
 ## Installation Guide 📝
 
 ### Prerequisites
-```bash
 - Python 3.11+
 - Node.js & npm
 - MongoDB
@@ -83,7 +82,6 @@ For licensing, collaboration, or access requests:
 ## Installation Guide 📝
 
 ### Prerequisites
-```bash
 - Python 3.11+
 - Node.js & npm
 - MongoDB
@@ -93,52 +91,44 @@ For licensing, collaboration, or access requests:
 Setup Steps
 
 1. Clone the repository:
-```bash  git clone https://github.com/Karthik0704/Block-chain-based-AI-driven-secure-votting-system.git
-cd Block-chain-based-AI-driven-secure-votting-system
+    `bash  git clone https://github.com/Karthik0704/Block-chain-based-AI-driven-secure-votting-system.git`
+    `cd Block-chain-based-AI-driven-secure-votting-system`
 
 2. Create and activate virtual environment:
-```bash
-python -m venv venv
+    `python -m venv venv`
 # For Windows
-venv\Scripts\activate
+    `venv\Scripts\activate`
 # For Linux/Mac
-source venv/bin/activate
+    `source venv/bin/activate`
 
 3. Install dependencies:
-```bash pip install -r requirements.txt
+    `bash pip install -r requirements.txt`
 
 4. Configure environment variables:
-```bash
 # Create .env file in root directory
-TWILIO_ACCOUNT_SID=your_sid
-TWILIO_AUTH_TOKEN=your_token
-TWILIO_PHONE_NUMBER=your_phone
-MONGODB_URI=mongodb://localhost:27017/
-BLOCKCHAIN_PRIVATE_KEY=your_private_key
+    TWILIO_ACCOUNT_SID=your_sid
+    TWILIO_AUTH_TOKEN=your_token
+    TWILIO_PHONE_NUMBER=your_phone
+    MONGODB_URI=mongodb://localhost:27017/
+    BLOCKCHAIN_PRIVATE_KEY=your_private_key
 
 5. Start MongoDB:
-```bash 
-mongod
+    `mongod`
 
 6. Launch Ganache:
-    Open Ganache UI
-    Create new workspace
-    Configure port to 7545
-    Save workspace settings
+        Open Ganache UI
+        Create new workspace
+        Configure port to 7545
+        Save workspace settings
 
 7. Deploy smart contracts:
-```bash
-cd blockchain
-truffle compile
-truffle migrate
+    `cd blockchain`
+    `truffle compile`
+    `truffle migrate`
 
 8. Run the application:
-```bash
-cd voting_system_backend
-python manage.py runserver
-
-
-
+    `cd voting_system_backend`
+    `python manage.py runserver`
 
 ## Usage Guide 🔍
 
@@ -155,3 +145,7 @@ python manage.py runserver
 3. Select preferred candidate
 4. Confirm vote
 5. Receive blockchain transaction confirmation
+
+
+
+
