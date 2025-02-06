@@ -146,6 +146,44 @@ Setup Steps
 4. Confirm vote
 5. Receive blockchain transaction confirmation
 
+# Access Requirements 🔒
+For complete setup instructions, source code access, and implementation details, please contact the project owner. This is a patent-pending technology with restricted access.
 
+# Security Features 🛡️
+    Blockchain immutability
+    Biometric authentication
+    Two-factor verification
+    Smart contract validation
+    Real-time monitoring
+    Transaction encryption
+
+# System Architecture 🏗️
+Core Components
+    Frontend Layer
+        User Interface
+        Face Detection Module
+        Vote Casting Interface
+
+    Backend Services
+        Django REST API
+        Face Recognition Engine
+        SMS Verification Service
+    Blockchain Layer
+        Smart Contracts
+        Vote Recording
+        Transaction Management
+        Database Layer
+    User Management
+        Vote Records
+        Authentication Data
+# Future Enhancements 🚀   
+    Quantum-resistant encryption
+    Enhanced biometric features
+    Cross-chain compatibility
+    Advanced anti-fraud measures
+    Global scaling capabilities
+
+License & Usage ⚖️
+    © 2025 Karthik K R. All rights reserved. Patent pending. Unauthorized reproduction or distribution is strictly prohibited.
 
 
