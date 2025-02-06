@@ -2,7 +2,16 @@
 
 A cutting-edge electronic voting system that combines blockchain security, facial recognition authentication, and smart contract technology to ensure transparent and tamper-proof elections.
 
-## System Architecture
+## Legal Notice ⚖️
+This project is patent-pending. All rights reserved. Unauthorized access, reproduction, or distribution of the source code is strictly prohibited.
+
+## Contact for Access 📧
+For licensing, collaboration, or access requests:
+
+**Karthik K R**
+- 📧 Email: karthik94833@gmail.com
+- 💼 LinkedIn: [Karthik K R](https://www.linkedin.com/in/karthik-k-r-37bb52244/)
+- 🔒 Patent Status: Pending
 
 
 ## Core Features 🔐
@@ -128,23 +137,7 @@ truffle migrate
 cd voting_system_backend
 python manage.py runserver
 
-## Complete System Interface Showcase 📸
 
-### User Registration & Authentication
-![Registration](docs/images/Screenshot%20(1).png)
-![Login Process](docs/images/Screenshot%20(2).png)
-
-### Biometric Verification
-![Face Detection](docs/images/Screenshot%20(3).png)
-![Face Recognition](docs/images/Screenshot%20(4).png)
-
-### Secure Voting Interface
-![Candidate Selection](docs/images/Screenshot%20(5).png)
-![Voting Process](docs/images/Screenshot%20(6).png)
-
-### Blockchain Transaction & Confirmation
-![Vote Recording](docs/images/Screenshot%20(7).png)
-![Success Confirmation](docs/images/Screenshot%20(8).png)
 
 
 ## Usage Guide 🔍
